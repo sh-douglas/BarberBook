@@ -1,0 +1,35 @@
+{
+  "name": "api",
+  "version": "0.0.1",
+  "description": "Aplicação web para gerenciamento de agendamentos de uma barbearia, priorizando regras de negócio (disponibilidade, conflitos, ciclo de vida de atendimento)",
+  "keywords": [
+    "Node",
+    "Express",
+    "TypeScript",
+    "Prisma",
+    "PostgreSQL",
+    "Zod"
+  ],
+  "homepage": "https://github.com/sh-douglas/BarberBook#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/sh-douglas/BarberBook.git"
+  },
+  "license": "MIT",
+  "author": "Douglas",
+  "type": "module",
+  "scripts": {
+    "dev": "tsx watch src/server.ts",
+    "build": "tsc",
+    "check": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.6",
+    "@types/node": "^26.4.1",
+    "tsx": "^4.23.13",
+    "typescript": "^7.0.2"
+  },
+  "dependencies": {
+    "express": "^5.2.1"
+  }
+}
