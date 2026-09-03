@@ -6,3 +6,127 @@ generator client {
 datasource db {
   provider = "postgresql"
 }
+
+model Customer {
+  id        String @id @default(uuid()) @db.Uuid
+  firstName String
+  lastName  String
+  phone     String @unique
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  appointments Appointment[]
+
+  @@map("customers")
+}
+
+model Barber {
+  id        String  @id @default(uuid()) @db.Uuid
+  firstName String
+  lastName  String
+  phone     String  @unique
+  active    Boolean @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  appointments     Appointment[]
+  unavailabilities BarberUnavailability[]
+
+  @@map("barbers")
+}
+
+model Service {
+  id          String  @id @default(uuid()) @db.Uuid
+  name        String  @unique
+  description String?
+  price       Decimal @db.Decimal(10, 2)
+  duration    Int
+  active      Boolean @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  appointmentServices AppointmentService[]
+
+  @@map("services")
+}
+
+model Appointment {
+  id          String            @id @default(uuid()) @db.Uuid
+  customerId  String            @db.Uuid
+  barberId    String            @db.Uuid
+  scheduledAt DateTime          @db.Timestamptz(6)
+  endAt       DateTime          @db.Timestamptz(6)
+  totalPrice  Decimal           @db.Decimal(10, 2)
+  status      AppointmentStatus @default(SCHEDULED)
+  notes       String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  customer Customer @relation(fields: [customerId], references: [id], onDelete: Restrict)
+  barber   Barber   @relation(fields: [barberId], references: [id], onDelete: Restrict)
+
+  appointmentServices AppointmentService[]
+
+  @@index([barberId, scheduledAt, endAt])
+  @@map("appointments")
+}
+
+model AppointmentService {
+  id            String  @id @default(uuid()) @db.Uuid
+  appointmentId String  @db.Uuid
+  serviceId     String  @db.Uuid
+  unitPrice     Decimal @db.Decimal(10, 2)
+  duration      Int
+
+  appointment Appointment @relation(fields: [appointmentId], references: [id], onDelete: Restrict)
+  service     Service     @relation(fields: [serviceId], references: [id], onDelete: Restrict)
+
+  @@unique([appointmentId, serviceId])
+  @@map("appointment_services")
+}
+
+model BusinessHour {
+  id        String    @id @default(uuid()) @db.Uuid
+  dayOfWeek DayOfWeek @unique
+  opensAt   DateTime? @db.Time(0)
+  closesAt  DateTime? @db.Time(0)
+  isOpen    Boolean   @default(true)
+
+  @@map("business_hours")
+}
+
+model BarberUnavailability {
+  id        String   @id @default(uuid()) @db.Uuid
+  barberId  String   @db.Uuid
+  startsAt  DateTime @db.Timestamptz(6)
+  endsAt    DateTime @db.Timestamptz(6)
+  reason    String?
+  createdAt DateTime @default(now())
+
+  barber Barber @relation(fields: [barberId], references: [id], onDelete: Restrict)
+
+  @@index([barberId, startsAt, endsAt])
+  @@map("barber_unavailabilities")
+}
+
+enum AppointmentStatus {
+  SCHEDULED
+  IN_PROGRESS
+  COMPLETED
+  CANCELED
+  NO_SHOW
+}
+
+enum DayOfWeek {
+  MONDAY
+  TUESDAY
+  WEDNESDAY
+  THURSDAY
+  FRIDAY
+  SATURDAY
+  SUNDAY
+}
